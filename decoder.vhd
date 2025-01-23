@@ -15,29 +15,24 @@ entity decoder is
 end decoder;
 
 architecture Behavioral of decoder is
-    signal alu_op_internal : STD_LOGIC_VECTOR (4 downto 0); 
 begin
     process(clk_in)
     begin
         if rising_edge(clk_in) and enable_in = '1' then
-
-            alu_op_internal <= instruction_in(15 downto 11);
-            alu_op_out <= alu_op_internal;
+            alu_op_out <= instruction_in(15 downto 11);
             sel_rD_out <= instruction_in(10 downto 8);
             sel_rM_out <= instruction_in(7 downto 5);
             sel_rN_out <= instruction_in(4 downto 2);
-            
-  
-            if instruction_in(15 downto 11) = "0110" or instruction_in(15 downto 11) = "0111" then
-                imm_data_out <= instruction_in(4 downto 0); -- LSL/LSR
+
+            if instruction_in(14 downto 11) = "0110" or instruction_in(14 downto 11) = "0111" then
+                imm_data_out <= instruction_in(7 downto 0); -- LSL/LSR
             else
-                imm_data_out <= instruction_in(7 downto 0);
+                imm_data_out <= instruction_in(7 downto 0); -- B/IMMEDIATE
             end if;
-            
-  
+
             case instruction_in(14 downto 11) is
                 when "1001" | "1010" | "1101" => 
-                    write_enable_out <= '0'; -- B, BEQ, and ST
+                    write_enable_out <= '0';  -- write is off for B, BEQ, ST
                 when others =>
                     write_enable_out <= '1';
             end case;
