@@ -22,8 +22,10 @@ begin
 					tmp <= std_logic_vector(unsigned(tmp) + 1);
 				when "10" => 
 					tmp <= pc_in;
-				when "11" => 
+				when "11" =>   
+					null;
 				when others =>
+					tmp <= tmp;
 	end process;			 
 	
 	pc_out <= tmp;
