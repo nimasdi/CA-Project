@@ -10,22 +10,22 @@ entity pc is
 end pc;
 
 architecture Behavioral of pc is
-	signal pc: std_logic_vector(15 downto 0) := x"0000";
+	signal tmp: std_logic_vector(15 downto 0) := x"0000";
 begin
 	process(clk_in)
 	begin
 		if rising_edge(clk_in) then
 			case pc_op_in is
 				when "00" =>
-					pc <= x"0000";
+					tmp <= x"0000";
 				when "01" =>
-					pc <= std_logic_vector(unsigned(pc) + 1);
+					tmp <= std_logic_vector(unsigned(tmp) + 1);
 				when "10" => 
-					pc <= pc_in;
+					tmp <= pc_in;
 				when "11" => 
 				when others =>
 	end process;			 
 	
-	pc_out <= pc;
+	pc_out <= tmp;
 	
 end Behavioral;
