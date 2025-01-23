@@ -23,12 +23,7 @@ begin
             sel_rD_out <= instruction_in(10 downto 8);
             sel_rM_out <= instruction_in(7 downto 5);
             sel_rN_out <= instruction_in(4 downto 2);
-
-            if instruction_in(14 downto 11) = "0110" or instruction_in(14 downto 11) = "0111" then
-                imm_data_out <= instruction_in(7 downto 0); -- LSL/LSR
-            else
-                imm_data_out <= instruction_in(7 downto 0); -- B/IMMEDIATE
-            end if;
+			imm_data_out <= instruction_in(7 downto 0);
 
             case instruction_in(14 downto 11) is
                 when "1001" | "1010" | "1101" => 
