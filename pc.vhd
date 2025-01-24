@@ -2,16 +2,16 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity pc is
+entity pcunit is
     port(
         clk_in: in std_logic;
         pc_op_in: in std_logic_vector(1 downto 0);
         pc_in: in std_logic_vector(15 downto 0);
         pc_out: out std_logic_vector(15 downto 0)
     );
-end pc;
+end pcunit;
 
-architecture Behavioral of pc is
+architecture Behavioral of pcunit is
     signal tmp: std_logic_vector(15 downto 0) := x"0000";
 begin
     process(clk_in)
