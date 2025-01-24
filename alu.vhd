@@ -5,6 +5,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 
+
 entity alu is
     Port ( clk_in : in STD_LOGIC;
            enable_in : in STD_LOGIC;
@@ -19,20 +20,18 @@ entity alu is
            rD_write_enable_out : out STD_LOGIC);
 end alu;
 
+
 architecture Behavioral of alu is
-	signal add_signed_ovfl : STD_LOGIC_VECTOR (15 downto 0);
-	signal add_unsigned_ovfl : STD_LOGIC_VECTOR (16 downto 0);
+    signal add_signed_ovfl : STD_LOGIC_VECTOR (15 downto 0);
     signal sub_signed_ovfl : STD_LOGIC_VECTOR (15 downto 0);
-	signal sub_unsigned_ovfl : STD_LOGIC_VECTOR (16 downto 0);
     signal is_both_positive : STD_LOGIC;
     signal is_both_negative : STD_LOGIC;
-    signal have_ovfl : STD_LOGIC;		   
-	signal error : Bit;
+    signal overflow : STD_LOGIC;	   
+	signal error : STD_Logic := '0';
      
 begin
     process(clk_in)
-    begin  
-		error <= '0';
+    begin		   
         if rising_edge(clk_in) and enable_in='1' then
         
             rD_write_enable_out <= rD_write_enable_in;
@@ -40,64 +39,57 @@ begin
             sub_signed_ovfl <= STD_LOGIC_VECTOR(signed(rM_data_in) - signed(rN_data_in));
             add_signed_ovfl <= STD_LOGIC_VECTOR(signed(rM_data_in) + signed(rN_data_in));
             
+            
             if rM_data_in(rM_data_in'left) = '0' and rN_data_in(rN_data_in'left) = '0' then
                 is_both_positive <= '1';
             else
                 is_both_positive <= '0';
             end if;
-			
+            
             if rM_data_in(rM_data_in'left) = '1' and rN_data_in(rN_data_in'left) = '1' then
                 is_both_negative <= '1';
             else
                 is_both_negative <= '0';
             end if;
-
+           
             if (signed(add_signed_ovfl) < 0 and is_both_positive = '1') or (signed(add_signed_ovfl) > 0 and is_both_negative = '1') then
-                have_ovfl <= '1';
+                overflow <= '1';
             else
-                have_ovfl <= '0';
+                overflow <= '0';
             end if;
             
-            case alu_op_in(3 downto 0) is
+            case alu_op_in(3 downto 0) is 
             
-                when "0000" =>
+                when "0000" => 
                     if alu_op_in(4) = '1' then
-                        if have_ovfl = '1' then
+                        if overflow = '1' then
                             result_out <= add_signed_ovfl;
-                            error <= '1';
+                            assert error = '0' 
+							report "we have overflow"
+							severity WARNING;
                         else
                             result_out <= add_signed_ovfl;
                         end if;    
-                    else  
-						-- check for unsigned add overflow
-                        add_unsigned_ovfl <= STD_LOGIC_VECTOR(unsigned(rM_data_in) + unsigned(rN_data_in));	
-						if add_unsigned_ovfl(16) = '1' then		  
-							result_out = add_unsigned_ovfl(15 downto 0);
-							error = '1';
-						else					  
-							result_out = add_unsigned_ovfl(15 downto 0);
-						end if;
+                    else
+                        result_out <= STD_LOGIC_VECTOR(unsigned(rM_data_in) + unsigned(rN_data_in));
+                        
                     end if;
                     
                     branch_out <= '0';
                     
                 when "0001" =>
                     if alu_op_in(4) = '1' then
-                        if have_ovfl = '1' then
+                        if overflow = '1' then
                             result_out <= sub_signed_ovfl;
-                            error <= '1';
+							assert error = '0' 
+							report "we have overflow"
+							severity WARNING;
                         else
                             result_out <= sub_signed_ovfl;
                         end if;
-                    else	   
-						-- check for unsigned sub overflow
-                        sub_unsigned_ovfl <= STD_LOGIC_VECTOR(unsigned(rM_data_in) - unsigned(rN_data_in));
-                        if sub_unsigned_ovfl(16) = '0' then
-							result_out = sub_unsigned_ovfl(15 downto 0);
-							error = '1';		 
-						else
-							result_out = sub_unsigned_ovfl(15 downto 0);
-						end if;
+                    else
+                        result_out <= STD_LOGIC_VECTOR(unsigned(rM_data_in) - unsigned(rN_data_in));
+                        
                     end if;
                     
                     branch_out <= '0';
@@ -145,8 +137,8 @@ begin
                     else
                         result_out(13) <= '0';
                     end if;
-                    
-                    if alu_op_in(4) = '1' and have_ovfl ='1' then
+                    -- Ver (signed overflow)
+                    if alu_op_in(4) = '1' and overflow ='1' then
                         result_out(12) <= '1';
                     else
                         result_out(12) <= '0';
@@ -165,7 +157,7 @@ begin
                     end if;
                     branch_out <= '1';
                     
-                when "1010" => 
+                when "1010" =>
                     if rN_data_in(14) = '1' then
                         result_out <= rM_data_in;
                         branch_out <= '1';
@@ -193,9 +185,7 @@ begin
                 when others =>
                     NULL;
             end case;
-        end if;                
-		assert error = '1'
-    	report "there is some overflow" severity warning;
+        end if;                                           
     end process;
 
 
