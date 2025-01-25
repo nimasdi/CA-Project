@@ -219,6 +219,12 @@ begin
     
     instruction <= ram_data_out when fetch_enable = '1'; -- data from ram goes to decoder
 
-
+    clk_process : process
+    begin
+         cpu_clock <= '0';
+         wait for clk_period/2;
+         cpu_clock <= '1';
+         wait for clk_period/2;
+    end process;
 
 end Behavioral;
