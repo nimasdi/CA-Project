@@ -25,9 +25,7 @@ begin
                 when "10" =>
                     tmp <= pc_in;
                 when "11" =>
-                    null; 
                 when others =>
-                    tmp <= tmp; 
             end case;
         end if;
     end process;

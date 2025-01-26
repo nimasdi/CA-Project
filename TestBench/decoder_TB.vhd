@@ -33,7 +33,7 @@ architecture TB_ARCHITECTURE of decoder_tb is
 	signal sel_rD_out : STD_LOGIC_VECTOR(2 downto 0);
 
 	-- Clock period definition
-	constant clk_period : time := 10 ns;
+	constant clk_period : time := 100 ns;
 
 begin
 
@@ -71,7 +71,7 @@ begin
 		-- Enable the decoder
 		enable_in <= '1';
 
-		-- Test case 1: ADD instruction (RRR type)
+		-- Test case 1: ADD instruction Unsigned (RRR type)
 		instruction_in <= "00000" & "001" & "010" & "011" & "00"; -- ADD r1, r2, r3
 		wait for clk_period;
 		assert alu_op_out = "00000" report "Test case 1: ALU op incorrect for ADD" severity error;
@@ -112,6 +112,14 @@ begin
 		assert sel_rN_out = "011" report "Test case 5: rN select incorrect for LSL" severity error;
 		assert imm_data_out = "01001100" report "Test case 5: Immediate data incorrect for LSL" severity error;
 		assert write_enable_out = '1' report "Test case 5: Write enable incorrect for LSL" severity error;
+			
+		-- Test case 6: LD instruction (RRU type)
+		instruction_in <= "01100" & "011" & "010" & "011" & "00"; -- LD
+		wait for clk_period;
+		assert alu_op_out = "01100" report "Test case 5: ALU op incorrect for LSL" severity error;
+		assert sel_rD_out = "011" report "Test case 5: rD select incorrect for LSL" severity error;
+		assert sel_rM_out = "010" report "Test case 5: rM select incorrect for LSL" severity error;
+		assert write_enable_out = '0' report "Test case 5: Write enable incorrect for LSL" severity error;	
 
 		-- End of simulation
 		wait;
